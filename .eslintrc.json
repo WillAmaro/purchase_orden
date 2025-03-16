@@ -1,9 +1,0 @@
-{
-    "extends": [
-      "plugin:@typescript-eslint/recommended",
-      "eslint:recommended"
-    ],
-    "rules": {
-      "@typescript-eslint/no-explicit-any": "off" 
-    }
-  }

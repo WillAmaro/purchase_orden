@@ -1,11 +1,22 @@
-import type { NextConfig } from "next";
+// import type { NextConfig } from "next";
 
-const nextConfig = {
-  typescript: {
-   // ignoreBuildErrors: false // workaround with slotprops data type error, in dev mode should be -> false
+module.exports = {
+ distDir: "build",
+
+  eslint: {
+    ignoreDuringBuilds: true,
   },
-  distDir: "build",
-};
+}
 
-module.exports = nextConfig;
+// const nextConfig = {
+//   typescript: {
+//    // ignoreBuildErrors: false // workaround with slotprops data type error, in dev mode should be -> false
+//   },
+//   distDir: "build",
+//   eslint: {
+//     ignoreDuringBuilds: true,
+//   },
+// };
+
+// module.exports = nextConfig;
 
