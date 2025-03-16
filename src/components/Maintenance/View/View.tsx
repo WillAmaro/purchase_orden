@@ -22,7 +22,7 @@ interface OrderDetailProps {
 
 export default function OrderDetailView({ data }: OrderDetailProps) {
   const router = useRouter(); // Obtén el router
-
+  console.log(data,"<->")
   // Desestructuramos directamente la data
   const { id, cliente, fechaCreacion, ordenCompraDetDtos } = data;
 
