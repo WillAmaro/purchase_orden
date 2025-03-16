@@ -6,17 +6,20 @@ import { useEffect, useMemo, useState } from "react";
 import BaseIcon from "./IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
+import DownloadDoneRoundedIcon from "@mui/icons-material/DownloadDoneRounded";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Button, CircularProgress } from "@mui/material";
+import { useRouter } from "next/navigation";
+import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
+
 export type DataGridRowActionProps = {
   show: boolean;
   onClick: (props: any) => void;
   disabled?: boolean;
   loading?: boolean;
 };
-import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
-import DownloadDoneRoundedIcon from "@mui/icons-material/DownloadDoneRounded";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 
-import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
 export type DataGridRowActionCustomizeProps = {
   show: boolean;
   onClick: (props: any) => void;
@@ -24,11 +27,8 @@ export type DataGridRowActionCustomizeProps = {
   loading?: boolean;
   disabledStatuses?: number[];
 };
-import { Button, CircularProgress, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
 
 export type DataGridRowActionsProps = {
-  // [key:string] : DataGridRowActionProps
   edit?: DataGridRowActionProps;
   export?: DataGridRowActionProps;
   confirm?: DataGridRowActionCustomizeProps;
@@ -39,7 +39,7 @@ export type DataGridRowActionsProps = {
 
 export default function List() {
   const [list, setList] = useState<any[]>([]);
-  const router = useRouter()
+  const router = useRouter();
   // Función para obtener todas las ordenes de compra utilizando el token
   const getOrdenCompras = async () => {
     const token = localStorage.getItem("authToken"); // Obtener el token del localStorage
@@ -108,7 +108,6 @@ export default function List() {
           getOrdenCompras();
           // O puedes usar sessionStorage si prefieres que el token se elimine cuando se cierre el navegador
           // sessionStorage.setItem("authToken", token);
-
           console.log("Token almacenado:", token);
 
           // Actualiza el estado si es necesario
@@ -161,50 +160,47 @@ export default function List() {
     },
   ];
 
-  const onEdit = () => {};
-  const onView = (item:any) => {
-    router.push(`/ver-orden/${item.id}`)
+  const onView = (item: any) => {
+    router.push(`/ver-orden/${item.id}`);
   };
   const onDelete = async (item: any) => {
     console.log(item);
-    
+
     // Obtener el token del localStorage
-    const authToken = localStorage.getItem('authToken');
-    
+    const authToken = localStorage.getItem("authToken");
+
     if (!authToken) {
-      console.error('No se encontró el token de autenticación');
+      console.error("No se encontró el token de autenticación");
       return;
     }
-  
+
     try {
       // Construir la URL para el pedido específico
       const url = `https://backendordencompra.azurewebsites.net/api/OrdenCompra/deleteordencompra/${item.id}`;
-  
+
       // Realizar la solicitud DELETE
       const response = await fetch(url, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${authToken}`,  // Agregar el token al header Authorization
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`, // Agregar el token al header Authorization
+          "Content-Type": "application/json",
         },
       });
-  
+
       if (response.ok) {
         const data = await response.json();
-        getOrdenCompras()
-        console.log('Producto eliminado con éxito:', data);
+        getOrdenCompras();
+        console.log("Producto eliminado con éxito:", data);
         // Puedes agregar alguna lógica para actualizar la interfaz, como recargar la lista
       } else {
-        console.error('Error al eliminar el producto:', response.status);
+        console.error("Error al eliminar el producto:", response.status);
       }
     } catch (error) {
-      console.error('Error en la solicitud de eliminación:', error);
+      console.error("Error en la solicitud de eliminación:", error);
     }
   };
-  
-  const rowActions: DataGridRowActionsProps = {
- 
 
+  const rowActions: DataGridRowActionsProps = {
     watch: {
       show: true,
       onClick: onView,
@@ -230,86 +226,6 @@ export default function List() {
             getActions: (params: any) => {
               let actions: any[] = [];
 
-              if (rowActions.edit?.show) {
-                const editAct = (
-                  <BaseIcon
-                    disabled={false}
-                    onPress={() => rowActions.edit?.onClick(params.row)}
-                    hoverBgColor="primary.contrastText"
-                  >
-                    <EditIcon
-                      fontSize="medium"
-                      sx={{
-                        "&:hover": {
-                          fill: "black",
-                        },
-                      }}
-                    />
-                  </BaseIcon>
-                );
-                actions.push(editAct);
-              }
-
-              if (rowActions.export?.show) {
-                const exportAct = (
-                  <BaseIcon
-                    onPress={() => rowActions.export?.onClick(params.row)}
-                    disabled={rowActions.export?.disabled}
-                    hoverBgColor="primary.contrastText"
-                  >
-                    {rowActions.export?.loading ? (
-                      <CircularProgress
-                        size={25}
-                        color="secondary"
-                        sx={{
-                          "& .hover": {
-                            background: "primary.contrastText",
-                          },
-                        }}
-                      />
-                    ) : (
-                      <FileDownloadRoundedIcon
-                        sx={{
-                          "&:hover": {
-                            fill: "black",
-                          },
-                        }}
-                      />
-                    )}
-                  </BaseIcon>
-                );
-                actions.push(exportAct);
-              }
-
-              if (rowActions.confirm?.show) {
-                const confirmAct = (
-                  <BaseIcon
-                    disabled={
-                      rowActions?.confirm.disabled ||
-                      (rowActions?.confirm?.disabledStatuses ?? []).includes(
-                        params.row.status
-                      )
-                      // params.row.status === Status.Confirmed ||
-                      // params.row.status === Status.Approved ||
-                      // params.row.status === Status.Accounted
-                    }
-                    onPress={() => rowActions.confirm?.onClick(params.row)}
-                    hoverBgColor="primary.contrastText"
-                  >
-                    {
-                      <DownloadDoneRoundedIcon
-                        sx={{
-                          "&:hover": {
-                            fill: "black",
-                          },
-                        }}
-                      />
-                    }
-                  </BaseIcon>
-                );
-                actions.push(confirmAct);
-              }
-
               if (rowActions.watch?.show) {
                 const watchAct = (
                   <BaseIcon
@@ -321,33 +237,6 @@ export default function List() {
                   </BaseIcon>
                 );
                 actions.push(watchAct);
-              }
-
-              if (rowActions.refused?.show) {
-                const refusedAct = (
-                  <BaseIcon
-                    onPress={() => rowActions.refused?.onClick(params.row)}
-                    hoverBgColor="primary.contrastText"
-                    disabled={
-                      rowActions.refused?.disabled ||
-                      (rowActions.refused?.disabledStatuses ?? []).includes(
-                        params.row.status
-                      )
-
-                      // params.row.status !== Status.Confirmed
-                    }
-                  >
-                    <HighlightOffOutlinedIcon
-                      fontSize="medium"
-                      sx={{
-                        "&:hover": {
-                          fill: "black",
-                        },
-                      }}
-                    />
-                  </BaseIcon>
-                );
-                actions.push(refusedAct);
               }
 
               if (rowActions.delete?.show) {
@@ -396,8 +285,9 @@ export default function List() {
             color: "white",
             width: "200px",
           }}
-
-          onClick={()=>{router.push("/crear-orden")}}
+          onClick={() => {
+            router.push("/crear-orden");
+          }}
         >
           AGREGAR NUEVA ORDEN
         </Button>
