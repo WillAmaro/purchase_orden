@@ -4,10 +4,19 @@ import { TextField, Button, Box, IconButton, Typography } from '@mui/material';
 import { AddCircle, RemoveCircle } from '@mui/icons-material';
 import { useRouter } from 'next/navigation'; // Importa el hook de enrutamiento de Next.js
 
+interface Producto {
+  id:number;
+  producto : string;
+  cantidad: any;
+  precioUnitario: any ;
+  subTotal: number ;
+  // Agrega otras propiedades de Producto si es necesario
+}
+
 export default function CreateOrder() {
   const [cliente, setCliente] = useState('');
   const [fechaCreacion, setFechaCreacion] = useState('');
-  const [productos, setProductos] = useState([
+  const [productos, setProductos] = useState<Producto[]>([
     { id: 0, producto: '', cantidad: 0, precioUnitario: 0, subTotal: 0 },
   ]);
 
@@ -15,22 +24,65 @@ export default function CreateOrder() {
 
   // Función para manejar el cambio de cantidad
   const handleCantidadChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
+    debugger;
+  
+    const value = e.target.value;
+  
+    // Si el campo está vacío, no actualizamos la cantidad, pero ponemos el subtotal a 0
+    if (value === "") {
+      const newProductos = [...productos];
+      newProductos[index].cantidad = "";  // La cantidad será 0 cuando el campo está vacío
+      newProductos[index].subTotal = 0;  // El subtotales se pone a 0
+      setProductos(newProductos);
+      return; // Salimos de la función para no hacer más cambios
+    }
+  
+    // Si no está vacío, lo convertimos en un número
+    const parsedValue = parseInt(value);
+  
+    // Si el valor es NaN, no hacemos nada
+    if (isNaN(parsedValue)) {
+      return;
+    }
+
+    // Si es un número válido, actualizamos la cantidad y el subtotales
     const newProductos = [...productos];
-    newProductos[index].cantidad = value;
-    newProductos[index].subTotal = (value|0) * (newProductos[index].precioUnitario|0);
+    newProductos[index].cantidad = parsedValue;
+    newProductos[index].subTotal = parsedValue * (newProductos[index].precioUnitario);
+  
     setProductos(newProductos);
   };
-
   // Función para manejar el cambio de precio unitario
   const handlePrecioUnitarioChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
+    debugger;
+  
+    const value = e.target.value;
+  
+    // Si el campo está vacío, ponemos el precioUnitario y subtotales a 0
+    if (value === "") {
+      const newProductos = [...productos];
+      newProductos[index].precioUnitario = "";  // El precio unitario se pone a 0 cuando el campo está vacío
+      newProductos[index].subTotal = 0;       // El subtotales se pone a 0
+      setProductos(newProductos);
+      return; // Salimos de la función para no hacer más cambios
+    }
+  
+    // Convertimos el valor a número flotante
+    const parsedValue = parseFloat(value);
+  
+    // Si el valor no es un número válido, no hacemos nada
+    if (isNaN(parsedValue)) {
+      return;
+    }
+  
+    // Si es un número válido, actualizamos el precio unitario y el subtotales
     const newProductos = [...productos];
-    newProductos[index].precioUnitario = value;
-    newProductos[index].subTotal = (newProductos[index].cantidad|0) * (value|0);
+    newProductos[index].precioUnitario = parsedValue;
+    newProductos[index].subTotal = (newProductos[index].cantidad) * parsedValue;
+  
     setProductos(newProductos);
   };
-
+  
   // Función para agregar un nuevo producto
   const handleAddProduct = () => {
     setProductos([
@@ -80,7 +132,7 @@ export default function CreateOrder() {
       if (response.ok) {
         const data = await response.json();
         console.log('Orden creada con éxito', data);
-        router.push('/test'); // Redirigir a la página de ordenes
+        router.push('/'); // Redirigir a la página de ordenes
       } else {
         console.error('Error al crear la orden:', response.status);
       }
@@ -138,7 +190,7 @@ export default function CreateOrder() {
               fullWidth
               sx={{ marginBottom: '1rem', height: "40px", fontSize: "12px" }}
             />
-            {productos.map((producto, index) => (
+            {productos.map((producto:any, index:number) => (
               <Box key={index} display="flex" flexDirection="column" gap={2}>
                 <span>PRODUCTO</span>
                 <TextField
